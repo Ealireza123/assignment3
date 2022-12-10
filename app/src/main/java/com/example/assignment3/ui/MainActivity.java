@@ -1,10 +1,12 @@
-package com.example.assignment3;
+package com.example.assignment3.ui;
 
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+
+import com.example.assignment3.R;
 
 public class MainActivity extends AppCompatActivity {
 

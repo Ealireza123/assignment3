@@ -1,4 +1,4 @@
-package com.example.assignment3;
+package com.example.assignment3.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.fragment.app.Fragment;
+import com.example.assignment3.R;
 
 public class HistoryFragment extends Fragment {
     public HistoryFragment() {

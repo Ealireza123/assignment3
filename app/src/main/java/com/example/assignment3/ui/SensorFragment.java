@@ -1,4 +1,4 @@
-package com.example.assignment3;
+package com.example.assignment3.ui;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -15,7 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
-
+import com.example.assignment3.R;
 public class SensorFragment extends Fragment implements SensorEventListener {
 
     private static final float SHAKE_THRESHOLD = 1.1f;
