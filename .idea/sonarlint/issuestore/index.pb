@@ -9,9 +9,7 @@ t
 Dapp/src/main/java/com/example/assignment3/greenDao/DBOpenHelper.java,6\0\60df754d7205cb7c83be73c59f9c4d6103118c88
 ?
 settings.gradle,0\5\05efc8b1657769a27696d478ded1e95f38737233
-@
-app/build.gradle,f\4\f4a01d6a4fcb971362ec00a83903fd3902f52164
-q
-Aapp/src/main/java/com/example/assignment3/model/LocationItem.java,5\5\5517fe1589767d3fa69107192044bb30f6b9878f
-v
-Fapp/src/main/java/com/example/assignment3/model/TimeBaseDataModel.java,9\b\9b25039cc38e1bb8e25e3ed260e71f8ee27d738b
+P
+ app/src/main/AndroidManifest.xml,8\c\8c55c3ccc257e5907959013f99656e4c8ec3903e
+n
+>app/src/main/java/com/example/assignment3/ui/MainActivity.java,7\7\778d3b7d7e38c5fb525a1b3262b1fbef0e65be08

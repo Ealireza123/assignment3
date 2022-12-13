@@ -5,10 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.assignment3.greenDao.DBOpenHelper;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class Repository {
     private static Repository instance;
@@ -39,30 +36,14 @@ public class Repository {
     }
 
     public List<TimeBaseDataModel> getSearchedList() {
-        return timeBaseDataModelDao
-                .queryBuilder()
-                .where(LocationItemDao
-                        .Properties
-                        .Id
-                        .eq(TimeBaseDataModelDao
-                                .Properties.Id))
-                .list();
+        return timeBaseDataModelDao.loadAll();
     }
 
-
     public void saveLastSearched(TimeBaseDataModel newData) {
-        SimpleDateFormat sdf = new SimpleDateFormat(
-                "yyyy-MM-dd | HH:mm:ss",
-                Locale.getDefault());
-        String currentDateAndTime = sdf.format(new Date().toString());
-        newData.setTestTime(currentDateAndTime);
-
         long parentRowID = timeBaseDataModelDao.insert(newData);
         for (LocationItem locationItem : newData.getLocationItemList()) {
             locationItem.setParentID(parentRowID);
             locationItemDao.insert(locationItem);
         }
     }
-
-
 }

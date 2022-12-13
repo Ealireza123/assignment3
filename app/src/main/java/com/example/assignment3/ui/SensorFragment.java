@@ -17,6 +17,13 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.example.assignment3.R;
+import com.example.assignment3.model.LocationItem;
+import com.example.assignment3.model.Repository;
+import com.example.assignment3.model.TimeBaseDataModel;
+
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class SensorFragment extends Fragment implements SensorEventListener {
 
@@ -42,6 +49,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     private Sensor accelerometer;
     private Sensor gyroscope;
     private Sensor geomagnetic;
+    private TimeBaseDataModel lastSavedItem;
 
     public SensorFragment() {
         // Required empty public constructor
@@ -62,6 +70,12 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         fetchSensorFromSensorManager();
 
         startTimerButton.setOnClickListener(v -> {
+            lastSavedItem = new TimeBaseDataModel();
+            String currentDateAndTime = ZonedDateTime.now().format(
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd | HH:mm:ss")
+            );
+            lastSavedItem.setTestTime(currentDateAndTime);
+
             startListeningToSensors();
 
             timerTextView.setVisibility(View.VISIBLE);
@@ -90,8 +104,13 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 timerTextView.setVisibility(View.GONE);
                 startTimerButton.setVisibility(View.VISIBLE);
                 unregisterListener();
+                saveData();
             }
         }.start();
+    }
+
+    private void saveData() {
+        Repository.getInstance(requireContext()).saveLastSearched(lastSavedItem);
     }
 
     private void startListeningToSensors() {
@@ -185,7 +204,29 @@ public class SensorFragment extends Fragment implements SensorEventListener {
             float xAxis = sensorEvent.values[0];
             float yAxis = sensorEvent.values[1];
             double angle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+            List<LocationItem> tmpList;
+            try {
+                tmpList = lastSavedItem.getLocationItemList();
+            } catch (Exception e) {
+                tmpList = null;
+            }
 
+            double difference = 0;
+            if (tmpList != null && !tmpList.isEmpty()) {
+                difference = (sensorEvent.timestamp
+                        - tmpList.get(tmpList.size() - 1).getTime());
+            }
+
+            // for record angle every 200 milliSeconds
+            if (difference == 0 || difference > 200) {
+                lastSavedItem.addItemToList(
+                        new LocationItem(
+                                sensorEvent.timestamp,
+                                angle
+                        )
+                );
+
+            }
             xValue.setText("xValue: \n" + String.format("%.06f", xAxis));
             yValue.setText("yValue: \n" + String.format("%.06f", yAxis));
             zValue.setText("zValue: \n" + String.format("%.06f", sensorEvent.values[2]));

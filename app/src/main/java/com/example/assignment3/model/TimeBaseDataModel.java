@@ -1,20 +1,21 @@
 package com.example.assignment3.model;
 
+import org.greenrobot.greendao.DaoException;
 import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
 import org.greenrobot.greendao.annotation.Id;
 import org.greenrobot.greendao.annotation.Property;
 import org.greenrobot.greendao.annotation.ToMany;
 
+import java.util.ArrayList;
 import java.util.List;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.DaoException;
 
 @Entity(
         nameInDb = "TimeBaseDataModel"
 )
 public class TimeBaseDataModel {
     @Id(autoincrement = true)
-    private long id;
+    private Long _id;
 
     @Property(nameInDb = "testTime")
     private String testTime;
@@ -31,9 +32,9 @@ public class TimeBaseDataModel {
     @Generated(hash = 1510825113)
     private transient TimeBaseDataModelDao myDao;
 
-    @Generated(hash = 567673607)
-    public TimeBaseDataModel(long id, String testTime) {
-        this.id = id;
+    @Generated(hash = 1805715807)
+    public TimeBaseDataModel(Long _id, String testTime) {
+        this._id = _id;
         this.testTime = testTime;
     }
 
@@ -53,19 +54,27 @@ public class TimeBaseDataModel {
         this.locationItemList = locationItemList;
     }
 
-    public long getId() {
-        return this.id;
+
+    public void addItemToList(LocationItem item) {
+        if(locationItemList == null){
+            locationItemList = new ArrayList<>();
+        }
+        locationItemList.add(item);
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public Long get_id() {
+        return this._id;
+    }
+
+    public void set_id(Long _id) {
+        this._id = _id;
     }
 
     /**
      * To-many relationship, resolved on first access (and after reset).
      * Changes to to-many relations are not persisted, make changes to the target entity.
      */
-    @Generated(hash = 852677335)
+    @Generated(hash = 143222265)
     public List<LocationItem> getLocationItemList() {
         if (locationItemList == null) {
             final DaoSession daoSession = this.daoSession;
@@ -74,7 +83,7 @@ public class TimeBaseDataModel {
             }
             LocationItemDao targetDao = daoSession.getLocationItemDao();
             List<LocationItem> locationItemListNew = targetDao
-                    ._queryTimeBaseDataModel_LocationItemList(id);
+                    ._queryTimeBaseDataModel_LocationItemList(_id);
             synchronized (this) {
                 if (locationItemList == null) {
                     locationItemList = locationItemListNew;

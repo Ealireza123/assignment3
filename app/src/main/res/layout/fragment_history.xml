@@ -7,7 +7,7 @@
     tools:context=".ui.HistoryFragment">
 
     <ExpandableListView
-        android:id="@+id/forecast_list"
+        android:id="@+id/expanded_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:divider="@android:color/darker_gray"

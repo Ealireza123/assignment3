@@ -6,8 +6,7 @@
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
     android:elevation="5dp"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/record_data_text_view"
@@ -15,8 +14,10 @@
         android:layout_height="wrap_content"
         android:text="2022/05/12 17:24:10"
         android:textColor="@color/black"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:textSize="18sp"
+        android:textStyle="bold"/>
 
     <com.google.android.material.divider.MaterialDivider
         android:id="@+id/group_divider"
@@ -26,11 +27,9 @@
         app:dividerColor="#787878"/>
 
     <LinearLayout
-        android:id="@+id/table_header_layout"
+        android:id="@+id/table_head_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp"
         android:orientation="horizontal">
 
         <TextView
@@ -39,7 +38,12 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Time(millisecond)"
-            android:textSize="14sp"/>
+            android:padding="8dp"
+            android:textSize="16sp"/>
+
+        <com.google.android.material.divider.MaterialDivider
+            android:layout_width="2dp"
+            android:layout_height="match_parent"/>
 
         <TextView
             android:layout_width="0dp"
@@ -47,7 +51,8 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="Angle(degree)"
-            android:textSize="14sp"/>
+            android:padding="8dp"
+            android:textSize="16sp"/>
 
     </LinearLayout>
 

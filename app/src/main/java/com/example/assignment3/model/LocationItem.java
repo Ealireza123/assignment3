@@ -1,20 +1,19 @@
 package com.example.assignment3.model;
 
 import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.Index;
-import org.greenrobot.greendao.annotation.Property;
 import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Property;
 
 @Entity(
         nameInDb = "LocationItem"
 )
 public class LocationItem {
     @Id(autoincrement = true)
-    private long id;
+    private Long _id;
 
-    @Index(unique = true)
-    private long parentID;
+    @Property(nameInDb = "parentID")
+    private Long parentID;
 
     @Property(nameInDb = "time")
     private double time;
@@ -22,15 +21,14 @@ public class LocationItem {
     @Property(nameInDb = "angle")
     private double angle;
 
-    public LocationItem(long parentID, double time, double angle) {
-        this.parentID = parentID;
+    public LocationItem(double time, double angle) {
         this.time = time;
         this.angle = angle;
     }
 
-    @Generated(hash = 576009675)
-    public LocationItem(long id, long parentID, double time, double angle) {
-        this.id = id;
+    @Generated(hash = 1669079339)
+    public LocationItem(Long _id, Long parentID, double time, double angle) {
+        this._id = _id;
         this.parentID = parentID;
         this.time = time;
         this.angle = angle;
@@ -56,19 +54,19 @@ public class LocationItem {
         this.angle = angle;
     }
 
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getParentID() {
+    public Long getParentID() {
         return this.parentID;
     }
 
-    public void setParentID(long parentID) {
+    public void setParentID(Long parentID) {
         this.parentID = parentID;
+    }
+
+    public Long get_id() {
+        return this._id;
+    }
+
+    public void set_id(Long _id) {
+        this._id = _id;
     }
 }
