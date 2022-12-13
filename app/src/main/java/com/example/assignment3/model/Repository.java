@@ -52,7 +52,7 @@ public class Repository {
 
     public void saveLastSearched(TimeBaseDataModel newData) {
         SimpleDateFormat sdf = new SimpleDateFormat(
-                "yyyy-MM-dd / HH:mm:ss",
+                "yyyy-MM-dd | HH:mm:ss",
                 Locale.getDefault());
         String currentDateAndTime = sdf.format(new Date().toString());
         newData.setTestTime(currentDateAndTime);
@@ -60,7 +60,7 @@ public class Repository {
         long parentRowID = timeBaseDataModelDao.insert(newData);
         for (LocationItem locationItem : newData.getLocationItemList()) {
             locationItem.setParentID(parentRowID);
-            long forecastRowId = locationItemDao.insert(locationItem);
+            locationItemDao.insert(locationItem);
         }
     }
 
