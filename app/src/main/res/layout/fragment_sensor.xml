@@ -224,12 +224,20 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/start_timer_button"
+        android:id="@+id/start_ten_second_timer_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="24dp"
-        android:text="start"
+        android:text="start 10 seconds"
+        android:visibility="visible"/>
+  <Button
+        android:id="@+id/start_one_second_timer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="24dp"
+        android:text="start 1 second"
         android:visibility="visible"/>
 
     <TextView

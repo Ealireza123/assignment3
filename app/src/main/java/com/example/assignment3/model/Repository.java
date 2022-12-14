@@ -2,7 +2,6 @@ package com.example.assignment3.model;
 
 import static java.lang.String.valueOf;
 
-import android.content.Context;
 import android.os.Environment;
 
 import java.io.File;
@@ -12,16 +11,14 @@ import java.util.List;
 
 public class Repository {
     private static Repository instance;
-    private final Context context;
 
-    private Repository(Context context) {
-        this.context = context;
+    private Repository() {
     }
 
     //singleton design pattern
-    public static Repository getInstance(Context context) {
+    public static Repository getInstance() {
         if (instance == null) {
-            instance = new Repository(context);
+            instance = new Repository();
         }
         return instance;
     }
@@ -34,13 +31,13 @@ public class Repository {
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(saveFilePath);
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(fileOutputStream);
-            outputStreamWriter.append("                " + fileName + "        \n");
+            outputStreamWriter.write("                " + fileName + "        \n");
             outputStreamWriter.append("   Time(MilliSecond)   ||   Angle(degree)   ");
             outputStreamWriter.append("\n================================================\n");
 
             for (AnglePerMilliSecondModelItem anglePerMilliSecondModelItem : list) {
                 outputStreamWriter.append(valueOf(anglePerMilliSecondModelItem.getTime()));
-                outputStreamWriter.append("       ||       ");
+                outputStreamWriter.append("         ||       ");
                 outputStreamWriter.append(valueOf(anglePerMilliSecondModelItem.getAngle()));
                 outputStreamWriter.append("\n================================================\n");
             }
@@ -55,8 +52,7 @@ public class Repository {
     }
 
     private File commonDownloadDirPath() {
-        File dir = null;
-        dir = new File(
+        File dir = new File(
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                 "assignment3");
 

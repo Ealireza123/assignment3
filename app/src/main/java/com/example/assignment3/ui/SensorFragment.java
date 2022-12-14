@@ -24,11 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SensorFragment extends Fragment implements SensorEventListener {
-
-    private static final int WAIT_TIME_MS = 500;
+    private static final int WAIT_TIME_FOR_TEN_SECONDS_IN_MS = 500;
+    private static final int WAIT_TIME_FOR_ONE_SECOND_IN_MS = 50;
     private static final double FILTER_FACTOR = 0.8;
 
-    private Button startTimerButton;
+    private Button startTenSecondTimerButton;
+    private Button startOneSecondTimerButton;
     private TextView timerTextView;
     private TextView xValue;
     private TextView yValue;
@@ -52,6 +53,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
             new ArrayList<>();
     private double lastFirstMethodSavedTimestamp = -1;
     private double lastSecondMethodSavedTimestamp = -1;
+    private int waitMS;
 
     public SensorFragment() {
         // Required empty public constructor
@@ -75,28 +77,41 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         initUI(view);
         fetchSensorFromSensorManager();
 
-        startTimerButton.setOnClickListener(v -> {
+        startTenSecondTimerButton.setOnClickListener(v -> {
             startListeningToSensors();
+            waitMS = WAIT_TIME_FOR_TEN_SECONDS_IN_MS;
 
             timerTextView.setVisibility(View.VISIBLE);
-            startTimerButton.setVisibility(View.GONE);
-            startCountDown();
+            startTenSecondTimerButton.setVisibility(View.GONE);
+            startOneSecondTimerButton.setVisibility(View.GONE);
+            startCountDown(10000, 1000);
 
+        });
+
+        startOneSecondTimerButton.setOnClickListener(v -> {
+            startListeningToSensors();
+            waitMS = WAIT_TIME_FOR_ONE_SECOND_IN_MS;
+
+            timerTextView.setVisibility(View.VISIBLE);
+            startTenSecondTimerButton.setVisibility(View.GONE);
+            startOneSecondTimerButton.setVisibility(View.GONE);
+            startCountDown(1000, 100);
         });
         return view;
     }
 
-    private void startCountDown() {
-        new CountDownTimer(10000, 1000) {
+    private void startCountDown(long timer, long step) {
+        new CountDownTimer(timer, step) {
 
             public void onTick(long millisUntilFinished) {
-                timerTextView.setText(String.format("0:0%d", millisUntilFinished / 1000));
+                timerTextView.setText(String.format("0:0%d", millisUntilFinished / step));
             }
 
             public void onFinish() {
                 timerTextView.setText("");
                 timerTextView.setVisibility(View.GONE);
-                startTimerButton.setVisibility(View.VISIBLE);
+                startTenSecondTimerButton.setVisibility(View.VISIBLE);
+                startOneSecondTimerButton.setVisibility(View.VISIBLE);
                 unregisterListener();
                 saveData();
             }
@@ -104,8 +119,8 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     }
 
     private void saveData() {
-        Repository.getInstance(requireContext()).saveFile(firstMethodAngleList, "firstMethod");
-        Repository.getInstance(requireContext()).saveFile(secondMethodAngleList, "secondMethod");
+        Repository.getInstance().saveFile(firstMethodAngleList, "firstMethod");
+        Repository.getInstance().saveFile(secondMethodAngleList, "secondMethod");
     }
 
     private void startListeningToSensors() {
@@ -157,8 +172,10 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     }
 
     private void initUI(View view) {
-        startTimerButton = view
-                .findViewById(R.id.start_timer_button);
+        startTenSecondTimerButton = view
+                .findViewById(R.id.start_ten_second_timer_button);
+        startOneSecondTimerButton = view
+                .findViewById(R.id.start_one_second_timer_button);
         timerTextView = view
                 .findViewById(R.id.timer_text_view);
 
@@ -210,28 +227,10 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     //𝐶𝑜𝑚𝑝𝑙𝑒𝑛𝑡𝑎𝑟𝑦𝑉𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑎𝑐𝑐𝐴𝑛𝑔𝑙𝑒(𝑛) + (1 − 𝐹) 𝑔𝑦𝑟𝑜𝐴𝑛𝑔𝑙𝑒(𝑛)
     private double filterGeoAndAcceleratorAngel(double rawAcceleratorAngel, double rawGyroscopeAngel) {
         Log.d("TAG9", "filterGeoAndAcceleratorAngel: "+rawGyroscopeAngel);
-        if (rawGyroscopeAngel <= 90 && rawGyroscopeAngel >= 0) {
+        if (rawGyroscopeAngel <= 90 && rawGyroscopeAngel >= 10) {
             return ((FILTER_FACTOR * rawAcceleratorAngel) + ((1 - FILTER_FACTOR) * rawGyroscopeAngel));
         }
         return -1;
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent sensorEvent) {
-        Sensor sensor = sensorEvent.sensor;
-        float rawXAxis = sensorEvent.values[0];
-        float rawYAxis = sensorEvent.values[1];
-        float rawZAxis = sensorEvent.values[2];
-
-        if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            acceleratorSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
-        } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            gyroscopeSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
-        } else if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            xGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: xValue: \n" + String.format("%.06f", rawXAxis));
-            yGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: yValue: \n" + String.format("%.06f", rawYAxis));
-            zGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: zValue: \n" + String.format("%.06f", rawZAxis));
-        }
     }
 
     private void gyroscopeSensorJob(SensorEvent sensorEvent, float rawXAxis, float rawYAxis, float rawZAxis) {
@@ -239,7 +238,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 - lastSecondMethodSavedTimestamp);
 
         // for record angle every 500 milliSeconds
-        if (lastSecondMethodSavedTimestamp == -1 || difference > WAIT_TIME_MS) {
+        if (lastSecondMethodSavedTimestamp == -1 || difference > waitMS) {
             double yDegree = Math.toDegrees(rawYAxis);
             double unsignedYDegree = Math.abs(yDegree);
 
@@ -259,7 +258,10 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                         filterGeoAndAcceleratorAngel(10, unsignedYDegree);
             }
             if(filteredAngle != -1) {
-                secondMethodAngleList.add(new AnglePerMilliSecondModelItem(sensorEvent.timestamp, filteredAngle));
+                secondMethodAngleList.add(
+                        new AnglePerMilliSecondModelItem(
+                                sensorEvent.timestamp,
+                                filteredAngle));
                 lastSecondMethodSavedTimestamp = sensorEvent.timestamp;
                 secondMethodTextView
                         .setText(String.format("%.01f", filteredAngle) + "°");
@@ -277,7 +279,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 - lastFirstMethodSavedTimestamp);
 
         // for record angle every 500 milliSeconds
-        if (lastFirstMethodSavedTimestamp == -1 || difference > WAIT_TIME_MS) {
+        if (lastFirstMethodSavedTimestamp == -1 || difference > waitMS) {
             double rawAngle = calculateAccelerometerRawAngle(rawXAxis, rawYAxis, rawZAxis);
             double filteredAngle = filterAcceleratorAngel(rawAngle);
 
@@ -297,6 +299,24 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         xValue.setText("xValue: \n" + String.format("%.06f", rawXAxis));
         yValue.setText("yValue: \n" + String.format("%.06f", rawYAxis));
         zValue.setText("zValue: \n" + String.format("%.06f", rawZAxis));
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        Sensor sensor = sensorEvent.sensor;
+        float rawXAxis = sensorEvent.values[0];
+        float rawYAxis = sensorEvent.values[1];
+        float rawZAxis = sensorEvent.values[2];
+
+        if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+            acceleratorSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
+        } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            gyroscopeSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
+        } else if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            xGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: xValue: \n" + String.format("%.06f", rawXAxis));
+            yGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: yValue: \n" + String.format("%.06f", rawYAxis));
+            zGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: zValue: \n" + String.format("%.06f", rawZAxis));
+        }
     }
 
     @Override
