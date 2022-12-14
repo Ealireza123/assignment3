@@ -1,7 +1,6 @@
 package com.example.assignment3.ui;
 
 import android.os.Bundle;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -19,21 +18,6 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             loadFragment(new SensorFragment());
         }
-
-        //initial ui
-        initialUI();
-
-    }
-
-    private void initialUI() {
-        TextView sensorTextButton = findViewById(R.id.sensor_text_button);
-        TextView historyTextButton = findViewById(R.id.history_text_button);
-
-        sensorTextButton.setOnClickListener(v ->
-                loadFragment(new SensorFragment()));
-        historyTextButton
-                .setOnClickListener(v ->
-                        loadFragment(new HistoryFragment()));
     }
 
     private int loadFragment(Fragment fragment) {

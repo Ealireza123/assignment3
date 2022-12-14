@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'org.greenrobot.greendao'
 
 android {
     compileSdkVersion 33
@@ -27,11 +26,6 @@ android {
     namespace 'com.example.assignment3'
 }
 
-greendao {
-    schemaVersion 1
-    // daoPackage "com.example.model" // set package of generated classes
-}
-
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.5.1'
@@ -43,8 +37,4 @@ dependencies {
 
     //fragment
     implementation 'androidx.fragment:fragment:1.5.4'
-
-    //green dao ORM for DB
-    implementation 'org.greenrobot:greendao:3.3.0'
-    implementation 'org.greenrobot:greendao-gradle-plugin:3.3.0'
 }
