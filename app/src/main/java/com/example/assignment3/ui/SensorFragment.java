@@ -209,8 +209,8 @@ public class SensorFragment extends Fragment implements SensorEventListener {
 
     //𝐶𝑜𝑚𝑝𝑙𝑒𝑛𝑡𝑎𝑟𝑦𝑉𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑎𝑐𝑐𝐴𝑛𝑔𝑙𝑒(𝑛) + (1 − 𝐹) 𝑔𝑦𝑟𝑜𝐴𝑛𝑔𝑙𝑒(𝑛)
     private double filterGeoAndAcceleratorAngel(double rawAcceleratorAngel, double rawGyroscopeAngel) {
-        if (rawGyroscopeAngel <= -90 && rawGyroscopeAngel >= -180) {
-            rawGyroscopeAngel = Math.abs(rawGyroscopeAngel + 90);
+        Log.d("TAG9", "filterGeoAndAcceleratorAngel: "+rawGyroscopeAngel);
+        if (rawGyroscopeAngel <= 90 && rawGyroscopeAngel >= 0) {
             return ((FILTER_FACTOR * rawAcceleratorAngel) + ((1 - FILTER_FACTOR) * rawGyroscopeAngel));
         }
         return -1;
@@ -258,12 +258,12 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 filteredAngle =
                         filterGeoAndAcceleratorAngel(10, unsignedYDegree);
             }
-
-            secondMethodAngleList.add(new AnglePerMilliSecondModelItem(sensorEvent.timestamp, filteredAngle));
-            lastSecondMethodSavedTimestamp = sensorEvent.timestamp;
-            secondMethodTextView
-                    .setText(String.format("%.01f", filteredAngle) + "°");
-
+            if(filteredAngle != -1) {
+                secondMethodAngleList.add(new AnglePerMilliSecondModelItem(sensorEvent.timestamp, filteredAngle));
+                lastSecondMethodSavedTimestamp = sensorEvent.timestamp;
+                secondMethodTextView
+                        .setText(String.format("%.01f", filteredAngle) + "°");
+            }
         }
         xGyroValue.setText("xGyroValue: \n" + String.format("%.06f", rawXAxis));
         yGyroValue.setText("yGyroValue: \n" + String.format("%.06f", rawYAxis));
