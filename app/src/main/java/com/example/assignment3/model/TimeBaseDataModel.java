@@ -24,6 +24,23 @@ public class TimeBaseDataModel {
     @ToMany(referencedJoinProperty = "parentID")
     private List<LocationItem> locationItemList;
 
+    public void addItemToList(long timestamp, double angle, DataType dataType){
+        if(locationItemList == null || locationItemList.isEmpty()) {
+            locationItemList = new ArrayList<>();
+            LocationItem tmp = new LocationItem(timestamp, angle, dataType);
+            locationItemList.add(tmp);
+        }else {
+            LocationItem lastLocationItem =
+                    locationItemList.get(locationItemList.size() - 1);
+            if(lastLocationItem.getTime() == timestamp) {
+                lastLocationItem.addSecondAngle(angle, dataType);
+            }else{
+                LocationItem tmp = new LocationItem(timestamp, angle, dataType);
+                locationItemList.add(tmp);
+            }
+        }
+    }
+
     /** Used to resolve relations */
     @Generated(hash = 2040040024)
     private transient DaoSession daoSession;
@@ -48,18 +65,6 @@ public class TimeBaseDataModel {
 
     public void setTestTime(String testTime) {
         this.testTime = testTime;
-    }
-
-    public void setLocationItemList(List<LocationItem> locationItemList) {
-        this.locationItemList = locationItemList;
-    }
-
-
-    public void addItemToList(LocationItem item) {
-        if(locationItemList == null){
-            locationItemList = new ArrayList<>();
-        }
-        locationItemList.add(item);
     }
 
     public Long get_id() {
@@ -141,4 +146,5 @@ public class TimeBaseDataModel {
         this.daoSession = daoSession;
         myDao = daoSession != null ? daoSession.getTimeBaseDataModelDao() : null;
     }
+
 }

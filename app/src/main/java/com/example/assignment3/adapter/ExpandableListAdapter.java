@@ -43,8 +43,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         View childView = ((LayoutInflater) this.context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE))
                 .inflate(R.layout.list_item, parent, false);
-        initChildUI(childView, data.get(groupPosition).getLocationItemList().get(childPosition));
-
+        initChildUI(childView,
+                data.get(groupPosition).getLocationItemList().get(childPosition));
         return childView;
     }
 
@@ -95,11 +95,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private void initChildUI(View childView, LocationItem locationItem) {
         TextView timeTextView = childView
                 .findViewById(R.id.time_text_view);
-        TextView angleTextView = childView
-                .findViewById(R.id.angle_text_view);
+        TextView firstMethodAngleTextView = childView
+                .findViewById(R.id.first_method_angle_text_view);
+        TextView secondMethodAngleTextView = childView
+                .findViewById(R.id.second_method_angle_text_view);
 
         timeTextView.setText(valueOf(locationItem.getTime()));
-        angleTextView.setText(valueOf(locationItem.getAngle()));
+        firstMethodAngleTextView.setText(valueOf(locationItem.getFirstMethodAngle()));
+        secondMethodAngleTextView.setText(valueOf(locationItem.getSecondMethodAngle()));
     }
 
 

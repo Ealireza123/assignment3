@@ -17,6 +17,7 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.example.assignment3.R;
+import com.example.assignment3.model.DataType;
 import com.example.assignment3.model.LocationItem;
 import com.example.assignment3.model.Repository;
 import com.example.assignment3.model.TimeBaseDataModel;
@@ -27,11 +28,8 @@ import java.util.List;
 
 public class SensorFragment extends Fragment implements SensorEventListener {
 
-    private static final float SHAKE_THRESHOLD = 1.1f;
-    private static final int SHAKE_WAIT_TIME_MS = 250;
-    private static final float ROTATION_THRESHOLD = 2.0f;
-    private static final int ROTATION_WAIT_TIME_MS = 100;
-    private final double FILTER_FACTOR = 0.2;
+    private static final int WAIT_TIME_MS = 500;
+    private final double FILTER_FACTOR = 0.8;
     private Button startTimerButton;
     private TextView timerTextView;
     private TextView xValue;
@@ -197,44 +195,91 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor sensor = sensorEvent.sensor;
+        double filteredAccelerationAngle;
+        double filteredAccelerationAndGyroscopeAngle;
 
         if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
             Log.d("TAG4", "onSensorChanged: X: " + sensorEvent.values[0] + "  Y: " + sensorEvent.values[1] + "  Z: " + sensorEvent.values[2]);
 
             float xAxis = sensorEvent.values[0];
             float yAxis = sensorEvent.values[1];
-            double angle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
-            List<LocationItem> tmpList;
-            try {
-                tmpList = lastSavedItem.getLocationItemList();
-            } catch (Exception e) {
-                tmpList = null;
+            double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+
+            double filteredAngle = filterAcceleratorAngel(rawAngle);
+
+            if (filteredAngle != -1) {
+                filteredAccelerationAngle = filteredAngle;
+
+                List<LocationItem> tmpList;
+                try {
+                    tmpList = lastSavedItem.getLocationItemList();
+                } catch (Exception e) {
+                    tmpList = null;
+                }
+
+                double difference = 0;
+                if (tmpList != null && !tmpList.isEmpty()) {
+                    difference = (sensorEvent.timestamp
+                            - tmpList.get(tmpList.size() - 1).getTime());
+                }
+
+                // for record angle every 500 milliSeconds
+                if (difference == 0 || difference > WAIT_TIME_MS) {
+                    lastSavedItem.addItemToList(
+                            sensorEvent.timestamp,
+                            filteredAngle,
+                            DataType.FIRST_METHOD_ANGLE
+
+                    );
+
+                }
+                firstMethodTextView
+                        .setText(String.format("%.01f", filteredAngle) + "°");
             }
 
-            double difference = 0;
-            if (tmpList != null && !tmpList.isEmpty()) {
-                difference = (sensorEvent.timestamp
-                        - tmpList.get(tmpList.size() - 1).getTime());
-            }
-
-            // for record angle every 200 milliSeconds
-            if (difference == 0 || difference > 200) {
-                lastSavedItem.addItemToList(
-                        new LocationItem(
-                                sensorEvent.timestamp,
-                                angle
-                        )
-                );
-
-            }
             xValue.setText("xValue: \n" + String.format("%.06f", xAxis));
             yValue.setText("yValue: \n" + String.format("%.06f", yAxis));
             zValue.setText("zValue: \n" + String.format("%.06f", sensorEvent.values[2]));
-
-            firstMethodTextView
-                    .setText(String.format("%.01f", angle) + "°");
+            secondMethodTextView
+                    .setText(String.format("%.01f", rawAngle) + "°");
 
         } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            /*float xAxis = sensorEvent.values[0];
+            float yAxis = sensorEvent.values[1];
+            double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+
+            double filteredAngle = filteredAccelerationAndGyroscopeAngle(rawAngle);
+
+            if (filteredAngle != -1) {
+                filteredAccelerationAngle = filteredAngle;
+
+                List<LocationItem> tmpList;
+                try {
+                    tmpList = lastSavedItem.getLocationItemList();
+                } catch (Exception e) {
+                    tmpList = null;
+                }
+
+                double difference = 0;
+                if (tmpList != null && !tmpList.isEmpty()) {
+                    difference = (sensorEvent.timestamp
+                            - tmpList.get(tmpList.size() - 1).getTime());
+                }
+
+                // for record angle every 500 milliSeconds
+                if (difference == 0 || difference > WAIT_TIME_MS) {
+                    lastSavedItem.addItemToList(
+                            sensorEvent.timestamp,
+                            filteredAngle,
+                            DataType.SECOND_METHOD_ANGLE
+
+                    );
+
+                }
+                secondMethodTextView
+                        .setText(String.format("%.01f", filteredAngle) + "°");
+            }*/
+
             xGyroValue.setText("xGyroValue: \n" + String.format("%.06f", sensorEvent.values[0]));
             yGyroValue.setText("yGyroValue: \n" + String.format("%.06f", sensorEvent.values[1]));
             zGyroValue.setText("zGyroValue: \n" + String.format("%.06f", sensorEvent.values[2]));
@@ -246,16 +291,27 @@ public class SensorFragment extends Fragment implements SensorEventListener {
 
     }
 
+    //𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛 − 1) + (1 − 𝐹) ∗ 𝑠𝑒𝑛𝑠𝑜𝑟𝑣𝑎𝑙𝑢𝑒(𝑛)
+    private double filterAcceleratorAngel(double rawAngle) {
+        if (rawAngle <= 90 && rawAngle >= 10) {
+            if (rawAngle == 10) {
+                return ((FILTER_FACTOR * 0) + ((1 - FILTER_FACTOR) * 10));
+            }
+            return ((FILTER_FACTOR * filterAcceleratorAngel(rawAngle - 1)) + ((1 - FILTER_FACTOR) * rawAngle));
+        }
+        return -1;
+    }
+
+    //𝐶𝑜𝑚𝑝𝑙𝑒𝑛𝑡𝑎𝑟𝑦𝑉𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑎𝑐𝑐𝐴𝑛𝑔𝑙𝑒(𝑛) + (1 − 𝐹) 𝑔𝑦𝑟𝑜𝐴𝑛𝑔𝑙𝑒(𝑛)
+    private double filterGeoAndAcceleratorAngel(double rawAcceleratorAngel, double rawGyroscopeAngel) {
+        if (rawAcceleratorAngel <= 90 && rawAcceleratorAngel >= 10) {
+            return ((FILTER_FACTOR * rawAcceleratorAngel) + ((1 - FILTER_FACTOR) * rawGyroscopeAngel));
+        }
+        return -1;
+    }
+
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.d("TAG4", "onAccuracyChanged: accuracyChanged by " + accuracy);
     }
-
-    //    𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛 − 1) + (1 − 𝐹) ∗ 𝑠𝑒𝑛𝑠𝑜𝑟𝑣𝑎𝑙𝑢𝑒(𝑛)
-    /*public double filteredValue(int n) {
-        return FILTER_FACTOR * filteredValue(n - 1) + (1 - FILTER_FACTOR) * sensorValue;
-    }*/
-
-//    𝐶𝑜𝑚𝑝𝑙𝑒𝑛𝑡𝑎𝑟𝑦𝑉𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑎𝑐𝑐𝐴𝑛𝑔𝑙𝑒(𝑛) + (1 − 𝐹) 𝑔𝑦𝑟𝑜𝐴𝑛𝑔𝑙𝑒(𝑛)
-
 }

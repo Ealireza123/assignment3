@@ -18,20 +18,37 @@ public class LocationItem {
     @Property(nameInDb = "time")
     private double time;
 
-    @Property(nameInDb = "angle")
-    private double angle;
+    @Property(nameInDb = "firstMethodAngle")
+    private double firstMethodAngle;
 
-    public LocationItem(double time, double angle) {
+    @Property(nameInDb = "secondMethodAngle")
+    private double secondMethodAngle;
+
+    public LocationItem(double time, double angle, DataType dataType) {
         this.time = time;
-        this.angle = angle;
+        if(dataType == DataType.FIRST_METHOD_ANGLE){
+            this.firstMethodAngle = angle;
+        }else if(dataType == DataType.SECOND_METHOD_ANGLE) {
+            this.secondMethodAngle = angle;
+        }
     }
 
-    @Generated(hash = 1669079339)
-    public LocationItem(Long _id, Long parentID, double time, double angle) {
+    @Generated(hash = 1398719274)
+    public LocationItem(Long _id, Long parentID, double time, double firstMethodAngle,
+            double secondMethodAngle) {
         this._id = _id;
         this.parentID = parentID;
         this.time = time;
-        this.angle = angle;
+        this.firstMethodAngle = firstMethodAngle;
+        this.secondMethodAngle = secondMethodAngle;
+    }
+
+    public void addSecondAngle(double angle, DataType dataType){
+        if(dataType == DataType.FIRST_METHOD_ANGLE){
+            firstMethodAngle = angle;
+        }else if(dataType == DataType.SECOND_METHOD_ANGLE) {
+            secondMethodAngle = angle;
+        }
     }
 
     @Generated(hash = 18379323)
@@ -44,14 +61,6 @@ public class LocationItem {
 
     public void setTime(double time) {
         this.time = time;
-    }
-
-    public double getAngle() {
-        return angle;
-    }
-
-    public void setAngle(double angle) {
-        this.angle = angle;
     }
 
     public Long getParentID() {
@@ -68,5 +77,21 @@ public class LocationItem {
 
     public void set_id(Long _id) {
         this._id = _id;
+    }
+
+    public double getFirstMethodAngle() {
+        return firstMethodAngle;
+    }
+
+    public void setFirstMethodAngle(double firstMethodAngle) {
+        this.firstMethodAngle = firstMethodAngle;
+    }
+
+    public double getSecondMethodAngle() {
+        return secondMethodAngle;
+    }
+
+    public void setSecondMethodAngle(double secondMethodAngle) {
+        this.secondMethodAngle = secondMethodAngle;
     }
 }
