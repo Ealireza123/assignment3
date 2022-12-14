@@ -48,6 +48,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     private Sensor gyroscope;
     private Sensor geomagnetic;
     private TimeBaseDataModel lastSavedItem;
+    private long lastSavedTimestamp = -1;
 
     public SensorFragment() {
         // Required empty public constructor
@@ -103,6 +104,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 startTimerButton.setVisibility(View.VISIBLE);
                 unregisterListener();
                 saveData();
+                lastSavedTimestamp = -1;
             }
         }.start();
     }
@@ -195,63 +197,45 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor sensor = sensorEvent.sensor;
-        double filteredAccelerationAngle;
-        double filteredAccelerationAndGyroscopeAngle;
 
         if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
             Log.d("TAG4", "onSensorChanged: X: " + sensorEvent.values[0] + "  Y: " + sensorEvent.values[1] + "  Z: " + sensorEvent.values[2]);
 
-            float xAxis = sensorEvent.values[0];
-            float yAxis = sensorEvent.values[1];
-            double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+            double difference = (sensorEvent.timestamp
+                    - lastSavedTimestamp);
+            // for record angle every 500 milliSeconds
+            if (lastSavedTimestamp == -1 || difference == 0 || difference > WAIT_TIME_MS) {
+                float xAxis = sensorEvent.values[0];
+                float yAxis = sensorEvent.values[1];
 
-            double filteredAngle = filterAcceleratorAngel(rawAngle);
+                double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+                double filteredAngle = filterAcceleratorAngel(rawAngle);
 
-            if (filteredAngle != -1) {
-                filteredAccelerationAngle = filteredAngle;
-
-                List<LocationItem> tmpList;
-                try {
-                    tmpList = lastSavedItem.getLocationItemList();
-                } catch (Exception e) {
-                    tmpList = null;
-                }
-
-                double difference = 0;
-                if (tmpList != null && !tmpList.isEmpty()) {
-                    difference = (sensorEvent.timestamp
-                            - tmpList.get(tmpList.size() - 1).getTime());
-                }
-
-                // for record angle every 500 milliSeconds
-                if (difference == 0 || difference > WAIT_TIME_MS) {
+                if (filteredAngle != -1) {
                     lastSavedItem.addItemToList(
                             sensorEvent.timestamp,
                             filteredAngle,
                             DataType.FIRST_METHOD_ANGLE
 
                     );
+                    lastSavedTimestamp = sensorEvent.timestamp;
 
+                    firstMethodTextView
+                            .setText(String.format("%.01f", filteredAngle) + "°");
                 }
-                firstMethodTextView
-                        .setText(String.format("%.01f", filteredAngle) + "°");
             }
-
-            xValue.setText("xValue: \n" + String.format("%.06f", xAxis));
-            yValue.setText("yValue: \n" + String.format("%.06f", yAxis));
+            xValue.setText("xValue: \n" + String.format("%.06f", sensorEvent.values[0]));
+            yValue.setText("yValue: \n" + String.format("%.06f", sensorEvent.values[1]));
             zValue.setText("zValue: \n" + String.format("%.06f", sensorEvent.values[2]));
-            secondMethodTextView
-                    .setText(String.format("%.01f", rawAngle) + "°");
-
         } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            /*float xAxis = sensorEvent.values[0];
-            float yAxis = sensorEvent.values[1];
-            double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
+            double difference = (sensorEvent.timestamp
+                    - lastSavedTimestamp);
 
-            double filteredAngle = filteredAccelerationAndGyroscopeAngle(rawAngle);
-
-            if (filteredAngle != -1) {
-                filteredAccelerationAngle = filteredAngle;
+            // for record angle every 500 milliSeconds
+            if (lastSavedTimestamp == -1 || difference == 0 || difference > WAIT_TIME_MS) {
+                float xAxis = sensorEvent.values[0];
+                float yAxis = sensorEvent.values[1];
+                double rawAngle = Math.atan2(xAxis, yAxis) / (Math.PI / 180);
 
                 List<LocationItem> tmpList;
                 try {
@@ -260,26 +244,37 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                     tmpList = null;
                 }
 
-                double difference = 0;
+                LocationItem lastSaved;
                 if (tmpList != null && !tmpList.isEmpty()) {
-                    difference = (sensorEvent.timestamp
-                            - tmpList.get(tmpList.size() - 1).getTime());
+                    lastSaved = tmpList
+                            .get(tmpList
+                                    .size() - 1);
+                } else {
+                    lastSaved = null;
                 }
 
-                // for record angle every 500 milliSeconds
-                if (difference == 0 || difference > WAIT_TIME_MS) {
+                if (lastSavedTimestamp == sensorEvent.timestamp) {
+
+                    double filteredAngle;
+                    if (lastSaved != null) {
+                        filteredAngle =
+                                filterGeoAndAcceleratorAngel(lastSaved.getFirstMethodAngle(), rawAngle);
+                    } else {
+                        filteredAngle =
+                                filterGeoAndAcceleratorAngel(10, rawAngle);
+                    }
+
                     lastSavedItem.addItemToList(
                             sensorEvent.timestamp,
                             filteredAngle,
                             DataType.SECOND_METHOD_ANGLE
-
                     );
-
+                    lastSavedTimestamp = sensorEvent.timestamp;
+                    secondMethodTextView
+                            .setText(String.format("%.01f", filteredAngle) + "°");
                 }
-                secondMethodTextView
-                        .setText(String.format("%.01f", filteredAngle) + "°");
-            }*/
 
+            }
             xGyroValue.setText("xGyroValue: \n" + String.format("%.06f", sensorEvent.values[0]));
             yGyroValue.setText("yGyroValue: \n" + String.format("%.06f", sensorEvent.values[1]));
             zGyroValue.setText("zGyroValue: \n" + String.format("%.06f", sensorEvent.values[2]));
@@ -288,7 +283,6 @@ public class SensorFragment extends Fragment implements SensorEventListener {
             yGeomagneticValue.setText("yMValue: \n" + String.format("%.06f", sensorEvent.values[1]));
             zGeomagneticValue.setText("zMValue: \n" + String.format("%.06f", sensorEvent.values[2]));
         }
-
     }
 
     //𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛 − 1) + (1 − 𝐹) ∗ 𝑠𝑒𝑛𝑠𝑜𝑟𝑣𝑎𝑙𝑢𝑒(𝑛)
