@@ -240,8 +240,12 @@ public class SensorFragment extends Fragment implements SensorEventListener {
 
         // for record angle every 500 milliSeconds
         if (lastSecondMethodSavedTimestamp == -1 || difference > waitMS) {
-            double yDegree = Math.toDegrees(rawYAxis);
-            double unsignedYDegree = Math.abs(yDegree);
+            double xDegree = Math.toDegrees(Math.abs(rawXAxis));
+            double yDegree = Math.toDegrees(Math.abs(rawYAxis));
+            double zDegree = Math.toDegrees(Math.abs(rawZAxis));
+            Log.d("TAG5", "X:" + xDegree + "Y:" + yDegree + "Z:" + zDegree);
+
+            double unsignedXDegree = Math.abs(xDegree);
             double filteredAngle;
             AnglePerMilliSecondModelItem lastSaved = null;
 
@@ -252,12 +256,14 @@ public class SensorFragment extends Fragment implements SensorEventListener {
 
             if (lastSaved != null) {
                 filteredAngle =
-                        filterGeoAndAcceleratorAngel(lastSaved.getAngle(), unsignedYDegree);
+                        filterGeoAndAcceleratorAngel(lastSaved.getAngle(), unsignedXDegree);
             } else {
                 filteredAngle =
-                        filterGeoAndAcceleratorAngel(10, unsignedYDegree);
+                        filterGeoAndAcceleratorAngel(10, unsignedXDegree);
             }
-            if(filteredAngle != -1) {
+            Log.d("TAG6", "filteredAngle:" + filteredAngle);
+
+            if (filteredAngle != -1) {
                 secondMethodAngleList.add(
                         new AnglePerMilliSecondModelItem(
                                 sensorEvent.timestamp,
