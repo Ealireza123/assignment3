@@ -164,7 +164,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
                 .getSystemService(Context.SENSOR_SERVICE);
 
         accelerometer = sensorManager
-                .getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscope = sensorManager
                 .getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         geomagnetic = sensorManager
@@ -233,7 +233,10 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         return -1;
     }
 
-    private void gyroscopeSensorJob(SensorEvent sensorEvent, float rawXAxis, float rawYAxis, float rawZAxis) {
+    private void gyroscopeSensorJob(SensorEvent sensorEvent) {
+        double rawXAxis = sensorEvent.values[0];
+        double rawYAxis = sensorEvent.values[1];
+        double rawZAxis = sensorEvent.values[2];
         double difference = (sensorEvent.timestamp
                 - lastSecondMethodSavedTimestamp);
 
@@ -272,7 +275,10 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         zGyroValue.setText("zGyroValue: \n" + String.format("%.06f", rawZAxis));
     }
 
-    private void acceleratorSensorJob(SensorEvent sensorEvent, float rawXAxis, float rawYAxis, float rawZAxis) {
+    private void acceleratorSensorJob(SensorEvent sensorEvent) {
+        double rawXAxis = sensorEvent.values[0];
+        double rawYAxis = sensorEvent.values[1];
+        double rawZAxis = sensorEvent.values[2];
         Log.d("TAG4", "onSensorChanged: X: " + sensorEvent.values[0] + "  Y: " + sensorEvent.values[1] + "  Z: " + sensorEvent.values[2]);
 
         double difference = (sensorEvent.timestamp
@@ -282,7 +288,7 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         if (lastFirstMethodSavedTimestamp == -1 || difference > waitMS) {
             double rawAngle = calculateAccelerometerRawAngle(rawXAxis, rawYAxis, rawZAxis);
             double filteredAngle = filterAcceleratorAngel(rawAngle);
-
+            Log.d("TAG11", "RAW: "+rawAngle+" FILTERED:"+ filteredAngle);
             if (filteredAngle != -1) {
                 firstMethodAngleList.add(
                         new AnglePerMilliSecondModelItem(
@@ -304,18 +310,15 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor sensor = sensorEvent.sensor;
-        float rawXAxis = sensorEvent.values[0];
-        float rawYAxis = sensorEvent.values[1];
-        float rawZAxis = sensorEvent.values[2];
 
-        if (sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
-            acceleratorSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
+        if (sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            acceleratorSensorJob(sensorEvent);
         } else if (sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            gyroscopeSensorJob(sensorEvent, rawXAxis, rawYAxis, rawZAxis);
+            gyroscopeSensorJob(sensorEvent);
         } else if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            xGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: xValue: \n" + String.format("%.06f", rawXAxis));
-            yGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: yValue: \n" + String.format("%.06f", rawYAxis));
-            zGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: zValue: \n" + String.format("%.06f", rawZAxis));
+            xGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: xValue: \n" + String.format("%.06f", sensorEvent.values[0]));
+            yGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: yValue: \n" + String.format("%.06f", sensorEvent.values[1]));
+            zGeomagneticValue.setText("TYPE_MAGNETIC_FIELD: zValue: \n" + String.format("%.06f", sensorEvent.values[2]));
         }
     }
 
