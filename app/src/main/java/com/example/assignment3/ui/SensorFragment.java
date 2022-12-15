@@ -213,20 +213,18 @@ public class SensorFragment extends Fragment implements SensorEventListener {
     }
 
     //𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑓𝑖𝑙𝑡𝑒𝑟𝑒𝑑𝑣𝑎𝑙𝑢𝑒(𝑛 − 1) + (1 − 𝐹) ∗ 𝑠𝑒𝑛𝑠𝑜𝑟𝑣𝑎𝑙𝑢𝑒(𝑛)
-    private double filterAcceleratorAngel(double rawAngle) {
-        if (rawAngle <= -90 && rawAngle >= -180) {
-            rawAngle = Math.abs(rawAngle + 90);
-            if (rawAngle == 10) {
+    private double filterAcceleratorAngel(double convertedAngle) {
+        if (convertedAngle <= 90 && convertedAngle >= 10) {
+            if (convertedAngle == 10) {
                 return ((FILTER_FACTOR * 0) + ((1 - FILTER_FACTOR) * 10));
             }
-            return ((FILTER_FACTOR * filterAcceleratorAngel(rawAngle - 1)) + ((1 - FILTER_FACTOR) * rawAngle));
+            return ((FILTER_FACTOR * filterAcceleratorAngel(convertedAngle - 1)) + ((1 - FILTER_FACTOR) * convertedAngle));
         }
         return -1;
     }
 
     //𝐶𝑜𝑚𝑝𝑙𝑒𝑛𝑡𝑎𝑟𝑦𝑉𝑎𝑙𝑢𝑒(𝑛) = 𝐹 ∗ 𝑎𝑐𝑐𝐴𝑛𝑔𝑙𝑒(𝑛) + (1 − 𝐹) 𝑔𝑦𝑟𝑜𝐴𝑛𝑔𝑙𝑒(𝑛)
     private double filterGeoAndAcceleratorAngel(double rawAcceleratorAngel, double rawGyroscopeAngel) {
-        Log.d("TAG9", "filterGeoAndAcceleratorAngel: "+rawGyroscopeAngel);
         if (rawGyroscopeAngel <= 90 && rawGyroscopeAngel >= 10) {
             return ((FILTER_FACTOR * rawAcceleratorAngel) + ((1 - FILTER_FACTOR) * rawGyroscopeAngel));
         }
@@ -244,10 +242,9 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         if (lastSecondMethodSavedTimestamp == -1 || difference > waitMS) {
             double yDegree = Math.toDegrees(rawYAxis);
             double unsignedYDegree = Math.abs(yDegree);
-
-            Log.d("TAG5", "onSensorChanged: timestamp: " + sensorEvent.timestamp + " gyro angle:" + unsignedYDegree);
             double filteredAngle;
             AnglePerMilliSecondModelItem lastSaved = null;
+
             if (!firstMethodAngleList.isEmpty()) {
                 lastSaved =
                         firstMethodAngleList.get(firstMethodAngleList.size() - 1);
@@ -279,7 +276,6 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         double rawXAxis = sensorEvent.values[0];
         double rawYAxis = sensorEvent.values[1];
         double rawZAxis = sensorEvent.values[2];
-        Log.d("TAG4", "onSensorChanged: X: " + sensorEvent.values[0] + "  Y: " + sensorEvent.values[1] + "  Z: " + sensorEvent.values[2]);
 
         double difference = (sensorEvent.timestamp
                 - lastFirstMethodSavedTimestamp);
@@ -287,8 +283,9 @@ public class SensorFragment extends Fragment implements SensorEventListener {
         // for record angle every 500 milliSeconds
         if (lastFirstMethodSavedTimestamp == -1 || difference > waitMS) {
             double rawAngle = calculateAccelerometerRawAngle(rawXAxis, rawYAxis, rawZAxis);
-            double filteredAngle = filterAcceleratorAngel(rawAngle);
-            Log.d("TAG11", "RAW: "+rawAngle+" FILTERED:"+ filteredAngle);
+            double convertedAngle = 90 - rawAngle;
+            double filteredAngle = filterAcceleratorAngel(convertedAngle);
+
             if (filteredAngle != -1) {
                 firstMethodAngleList.add(
                         new AnglePerMilliSecondModelItem(
